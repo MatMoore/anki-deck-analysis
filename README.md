@@ -7,6 +7,7 @@ Scripts to analyze my anki decks.
 - `python -m venv env`
 - `source ./env/bin/activate`
 - `pip install -r requirements.txt`
+- `python -m spacy download ko_core_news_md`
 
 ## Scripts
 
