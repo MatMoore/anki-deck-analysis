@@ -6,7 +6,6 @@ from anki.notes import Note
 import spacy
 import re
 from koparadigm import Paradigm
-from html.parser import HTMLParser
 
 nlp = spacy.load("ko_core_news_md")
 conjugator = Paradigm()
@@ -15,8 +14,7 @@ COLLECTION_PATH = "/Users/mat/Library/Application Support/Anki2/User 1/collectio
 KOREAN_DECK = '1541100429539'
 KOREAN_WORD_REGEX = re.compile(r'[\uAC00-\uD7AF]+')
 
-# TODO: strip square bracket markup as well
-HTML_TAG_REGEX = re.compile(r'(<!--.*?-->|<[^>]*>)') # https://github.com/pallets/markupsafe/blob/0.23/markupsafe/__init__.py#L21
+HTML_TAG_REGEX = re.compile(r'(<!--.*?-->|<[^>]*>|&nbsp;|\[[^\]]*\])') # https://github.com/pallets/markupsafe/blob/0.23/markupsafe/__init__.py#L21
 
 col = Collection(COLLECTION_PATH)
 note_ids = col.find_notes('deck:Korean AND "note:korean comprehension + production"')
@@ -47,6 +45,7 @@ def index_word(word):
   '''
   Add a word to the list of known words.
   If it looks like a verb, include various conjugations as well.
+  Otherwise, include various particles.
 
   This allows us to use morphological comparisons later on when checking
   whether a word in a sentence is known or not.
@@ -61,8 +60,12 @@ def index_word(word):
     if verbs is None:
       return
     for verb in verbs:
-      for _inflection, result in verb[1]:
-        words.add(result)
+      for _inflection, variations in verb[1]:
+        for variation in variations.split('/'):
+          words.add(variation)
+  else:
+    for particle in ('이', '가', '에', '로', '으로', '은', '는', '를', '을', '에서', '게서', '게', '게서는', '한테', '에게', '님'):
+      words.add(word + particle)
 
 
 def process_sentence(sentence):
@@ -79,10 +82,16 @@ def ignore_pos(pos):
   '''
   Decide whether to ignore a token based on the part-of-speech tag
   '''
-  if pos == 'PUNCT':
-    return True
-  return False
+  return pos not in 'VERB'
 
+  #return pos in (
+  #  'PUNCT',
+  #  'ADV',
+  #  'PRON',
+  #  'PROPN',
+  #  'AUX',
+  #  'DET'
+  #)
 
 def is_korean_word(text):
   '''
@@ -91,6 +100,34 @@ def is_korean_word(text):
   return KOREAN_WORD_REGEX.match(text)
 
 
+def strip_html(text):
+  '''
+  Return text with html tags, entities, anki markup stripped out
+  '''
+  return HTML_TAG_REGEX.sub(' ', text)
+
+
+for word in [
+  '있다',
+  '없다',
+  '이다',
+  '나다',
+  '그렇다',
+  '이렇다',
+  '어떻다',
+  '하다',
+  '가다',
+  '오다',
+  '알다',
+  '모르다',
+  '먹다',
+  '마시다',
+  '많다',
+  '같다',
+  '괜찮다',
+]:
+  index_word(word)
+
 for note_id in note_ids:
   note = Note(col=col, id=note_id)
   items = dict(note.items())
@@ -98,10 +135,9 @@ for note_id in note_ids:
   example2 = items['Korean example sentence 2']
   korean = items['Korean']
 
-  # TODO: fix entities such as &nbsp;
-  korean = HTML_TAG_REGEX.sub('', korean)
-  example1 = HTML_TAG_REGEX.sub('', example1)
-  example2 = HTML_TAG_REGEX.sub('', example2)
+  korean = strip_html(korean)
+  example1 = strip_html(example1)
+  example2 = strip_html(example2)
 
   for word in korean.strip().split(' '):
     index_word(word)
@@ -115,8 +151,8 @@ for doc in docs:
       continue
     if not is_korean_word(token.text):
       continue
-    print(token.pos_)
-    print(token.text)
+    #print(token.pos_)
+    #print(token.text)
 
     if token.text not in words:
       print(f'New word: {token.text} ({token.pos_})')
