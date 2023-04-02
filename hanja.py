@@ -6,20 +6,18 @@ from anki.collection import Collection
 from anki.notes import Note
 from collections import defaultdict
 
+from config import VocabFields, COLLECTION_PATH, VOCAB_NOTES, COMMON_CJK_CHARACTERS
+
 words_by_hanja_character = defaultdict(list)
 
-COLLECTION_PATH = "/Users/mat/Library/Application Support/Anki2/User 1/collection.anki2"
-KOREAN_DECK = '1541100429539'
-COMMON_CJK_CHARACTERS = range(0x4E00, 0x9FFF)
-
 col = Collection(COLLECTION_PATH)
-note_ids = col.find_notes('deck:Korean AND "note:korean comprehension + production"')
+note_ids = col.find_notes(VOCAB_NOTES)
 for note_id in note_ids:
   note = Note(col=col, id=note_id)
   items = dict(note.items())
-  hanja = items['Hanja'].strip()
-  korean = items['Korean']
-  english = items['English']
+  hanja = items[VocabFields.HANJA].strip()
+  korean = items[VocabFields.KOREAN]
+  english = items[VocabFields.ENGLISH]
 
   for character in hanja:
     if(ord(character)) not in COMMON_CJK_CHARACTERS:
