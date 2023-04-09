@@ -8,7 +8,7 @@ from anki.notes import Note
 from random import sample
 
 from config import VocabFields, COLLECTION_PATH, VOCAB_NOTES, COMMON_CJK_CHARACTERS
-
+from data_cleaning import extract_word
 
 col = Collection(COLLECTION_PATH)
 note_ids = col.find_notes(VOCAB_NOTES + ' AND tag:leech')
@@ -17,9 +17,8 @@ chosen = sample(notes, 3)
 
 for note in chosen:
   items = dict(note.items())
-  hanja = items[VocabFields.HANJA].strip()
-  korean = items[VocabFields.KOREAN]
-  english = items[VocabFields.ENGLISH]
+  korean = extract_word(items[VocabFields.KOREAN])
+  english = extract_word(items[VocabFields.ENGLISH])
 
   print(f"{korean} - {english}")
 

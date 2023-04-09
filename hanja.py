@@ -5,6 +5,7 @@ in my Korean anki deck.
 from anki.collection import Collection
 from anki.notes import Note
 from collections import defaultdict
+from data_cleaning import extract_word
 
 from config import VocabFields, COLLECTION_PATH, VOCAB_NOTES, COMMON_CJK_CHARACTERS
 
@@ -16,8 +17,8 @@ for note_id in note_ids:
   note = Note(col=col, id=note_id)
   items = dict(note.items())
   hanja = items[VocabFields.HANJA].strip()
-  korean = items[VocabFields.KOREAN]
-  english = items[VocabFields.ENGLISH]
+  korean = extract_word(items[VocabFields.KOREAN])
+  english = extract_word(items[VocabFields.ENGLISH])
 
   for character in hanja:
     if(ord(character)) not in COMMON_CJK_CHARACTERS:
