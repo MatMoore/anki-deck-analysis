@@ -9,7 +9,7 @@ idna==3.4
 iniconfig==1.1.1
 Markdown==3.4.1
 orjson==3.8.7
-packaging==22.0
+packaging==23.0
 pluggy==1.0.0
 protobuf==4.21.12
 PySocks==1.7.1
