@@ -7,7 +7,7 @@ from anki.collection import Collection
 from anki.notes import Note
 from random import sample
 
-from config import VocabFields, COLLECTION_PATH, VOCAB_NOTES, COMMON_CJK_CHARACTERS
+from config import VocabFields, COLLECTION_PATH, VOCAB_NOTES
 from data_cleaning import extract_word
 
 col = Collection(COLLECTION_PATH)

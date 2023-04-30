@@ -11,6 +11,7 @@ import re
 # https://github.com/pallets/markupsafe/blob/0.23/markupsafe/__init__.py#L21
 HTML_TAG_REGEX = re.compile(r'\s*(<!--.*?-->|<[^>]*>|&nbsp;|\[[^\]]*\])\s*')
 PAREN_REGEX = re.compile(r'\([^)]+\)')
+COMMON_CJK_CHARACTERS = range(0x4E00, 0x9FFF)
 
 
 def strip_html(text):
@@ -34,3 +35,13 @@ def extract_word(text):
   Remove html tags, entities, anki markup and parenthetical text.
   '''
   return strip_parens(strip_html(text))
+
+
+def extract_hanjas(hanjas):
+  result = []
+  for hanja in hanjas.split(','):
+    value = ''.join([char for char in hanja if ord(char) in COMMON_CJK_CHARACTERS]).strip()
+    if value:
+      result.append(value)
+
+  return result
